@@ -19,7 +19,6 @@ dependencies {
         exclude("io.github.eisop","dataflow-errorprone")
     }
     compileOnly("io.netty:netty-all:4.2.+")
-    
     runtimeOnly("ch.qos.logback:logback-classic:1.2.+")
     runtimeOnly("io.netty:netty-buffer:4.1.100.Final")
     runtimeOnly("io.netty.incubator:netty-incubator-transport-classes-io_uring:0.0.26.Final")
