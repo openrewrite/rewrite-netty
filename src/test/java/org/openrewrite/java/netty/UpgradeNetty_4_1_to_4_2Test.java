@@ -13,14 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 package org.openrewrite.java.netty;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.DocumentExample;
-import org.openrewrite.config.Environment;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
@@ -33,21 +29,21 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
     @Override
     public void defaults(RecipeSpec spec) {
         spec
+          .recipeFromResource(
+            "/META-INF/rewrite/netty-4_1_to_4_2.yml",
+            "org.openrewrite.netty.UpgradeNetty_4_1_to_4_2")
           .parser(JavaParser.fromJavaVersion().classpath(
-            "netty-buffer", "netty-incubator-transport-classes-io_uring", "netty-transport-classes-io_uring"))
-          .recipe(Environment.builder()
-            .scanRuntimeClasspath("org.openrewrite")
-            .build()
-            .activateRecipes("org.openrewrite.netty.UpgradeNetty_4_1_to_4_2")
-          );
+            "netty-buffer",
+            "netty-incubator-transport-classes-io_uring",
+            "netty-transport-classes-io_uring"));
     }
 
     @DocumentExample
     @Test
     void nettyUpgradeToVersion4_2() {
         rewriteRun(
-          //language=xml
           pomXml(
+            //language=xml
             """
               <project>
                   <modelVersion>4.0.0</modelVersion>
@@ -68,32 +64,10 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
                   </dependencies>
               </project>
               """,
-            spec -> spec.after(pom -> {
-                Matcher versionMatcher = Pattern.compile("4\\.2\\.\\d+\\.Final").matcher(pom);
-                assertThat(versionMatcher.find()).describedAs("Expected 4.2.x in %s", pom).isTrue();
-                String nettyVersion = versionMatcher.group(0);
-
-                return """
-                         <project>
-                             <modelVersion>4.0.0</modelVersion>
-                             <groupId>org.example</groupId>
-                             <artifactId>example</artifactId>
-                             <version>1.0.0</version>
-                             <dependencies>
-                                 <dependency>
-                                     <groupId>io.netty</groupId>
-                                     <artifactId>netty-buffer</artifactId>
-                                     <version>%s</version>
-                                 </dependency>
-                                 <dependency>
-                                     <groupId>io.netty</groupId>
-                                     <artifactId>netty-transport-classes-io_uring</artifactId>
-                                     <version>%s</version>
-                                 </dependency>
-                             </dependencies>
-                         </project>
-                  """.formatted(nettyVersion, nettyVersion);
-            })),
+            spec -> spec.after(pom -> assertThat(pom)
+              .describedAs("Expected 4.2.x in %s")
+              .containsPattern("4\\.2\\.\\d+\\.Final")
+              .actual())),
           //language=java
           java(
             """
@@ -108,7 +82,6 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
               """,
             """
               import io.netty.buffer.ByteBuf;
-              import io.netty.channel.uring.IoUring;
 
               class Test {
                   static void helloNetty() {

@@ -27,19 +27,19 @@ recipeList:
   - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
       groupId: io.netty
       artifactId: '*'
-      newVersion: 4.2.2.Final
+      newVersion: 4.2.x
   - org.openrewrite.java.dependencies.ChangeDependency:
       oldGroupId: io.netty.incubator
       oldArtifactId: netty-incubator-transport-classes-io_uring
       newGroupId: io.netty
       newArtifactId: netty-transport-classes-io_uring
-      newVersion: 4.2.2.Final
+      newVersion: 4.2.x
   - org.openrewrite.java.dependencies.ChangeDependency:
       oldGroupId: io.netty.incubator
       oldArtifactId: netty-incubator-transport-native-io_uring
       newGroupId: io.netty
       newArtifactId: netty-transport-native-io_uring
-      newVersion: 4.2.2.Final
+      newVersion: 4.2.x
   - org.openrewrite.java.ChangeType:
       oldFullyQualifiedTypeName: io.netty.incubator.channel.uring.IOUring
       newFullyQualifiedTypeName: io.netty.channel.uring.IoUring
@@ -47,3 +47,4 @@ recipeList:
       oldPackageName: io.netty.incubator.channel.uring
       newPackageName: io.netty.channel.uring
       recursive: true
+  - org.openrewrite.java.netty.EventLoopGroupToMultiThreadIoEventLoopGroupRecipes
