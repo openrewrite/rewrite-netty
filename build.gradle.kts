@@ -9,7 +9,7 @@ val rewriteVersion = rewriteRecipe.rewriteVersion.get()
 dependencies {
     implementation(platform("org.openrewrite:rewrite-bom:$rewriteVersion"))
     implementation("org.openrewrite:rewrite-java")
-//    implementation("org.openrewrite.recipe:rewrite-java-dependencies:$rewriteVersion")
+    implementation("org.openrewrite.recipe:rewrite-java-dependencies:$rewriteVersion")
     implementation("org.openrewrite:rewrite-templating:$rewriteVersion")
 
     annotationProcessor("org.openrewrite:rewrite-templating:$rewriteVersion")
@@ -20,11 +20,13 @@ dependencies {
     compileOnly("io.netty:netty-all:4.2.+")
 
     testImplementation("org.openrewrite:rewrite-java-21")
+    testImplementation("org.openrewrite:rewrite-maven")
     testImplementation("org.openrewrite:rewrite-test")
 
     testRuntimeOnly("io.netty:netty-all:4.2.+")
+    testRuntimeOnly("io.netty.incubator:netty-incubator-transport-classes-io_uring:0.0.26.Final")
 }
 
 recipeDependencies {
-    //parserClasspath("io.netty:netty-all:4.2.+")
+    // parserClasspath("io.netty:netty-buffer:4.1.+")
 }
