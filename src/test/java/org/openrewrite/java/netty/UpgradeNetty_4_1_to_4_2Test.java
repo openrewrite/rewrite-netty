@@ -68,6 +68,9 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
               .describedAs("Expected library version 4.2.x")
               .containsPattern("4\\.2\\.\\d+\\.Final")
               .doesNotContainPattern("4\\.1\\.\\d+\\.Final")
+              .doesNotContain("incubator")
+              .contains("netty-transport-classes-io_uring")
+              .contains("netty-buffer")
               .actual())),
           //language=java
           java(
