@@ -33,14 +33,37 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
             "/META-INF/rewrite/netty-4_1_to_4_2.yml",
             "org.openrewrite.netty.UpgradeNetty_4_1_to_4_2")
           .parser(JavaParser.fromJavaVersion().classpath(
-            "netty-buffer",
-            "netty-incubator-transport-classes-io_uring",
-            "netty-transport-classes-io_uring"));
+            "netty-incubator-transport-classes-io_uring"));
     }
 
     @DocumentExample
     @Test
-    void nettyUpgradeToVersion4_2() {
+    void changeType() {
+        rewriteRun(
+          //language=java
+          java(
+            """
+              import io.netty.buffer.ByteBuf;
+              import io.netty.incubator.channel.uring.IOUring;
+
+              class Test {
+                  boolean isAvailable = IOUring.isAvailable();
+              }
+              """,
+            """
+              import io.netty.buffer.ByteBuf;
+              import io.netty.channel.uring.IoUring;
+
+              class Test {
+                  boolean isAvailable = IoUring.isAvailable();
+              }
+              """
+          )
+        );
+    }
+
+    @Test
+    void changeDependency() {
         rewriteRun(
           pomXml(
             //language=xml
@@ -71,29 +94,7 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
               .doesNotContain("incubator")
               .contains("netty-transport-classes-io_uring")
               .contains("netty-buffer")
-              .actual())),
-          //language=java
-          java(
-            """
-              import io.netty.buffer.ByteBuf;
-              import io.netty.incubator.channel.uring.IOUring;
-
-              class Test {
-                  static void helloNetty() {
-                      Object[] input = new Object[] { "one", "two" };
-                  }
-              }
-              """,
-            """
-              import io.netty.buffer.ByteBuf;
-
-              class Test {
-                  static void helloNetty() {
-                      Object[] input = new Object[] { "one", "two" };
-                  }
-              }
-              """
-          )
+              .actual()))
         );
     }
 }

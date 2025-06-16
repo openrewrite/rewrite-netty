@@ -33,3 +33,24 @@ examples:
           EventLoopGroup group1 = new MultiThreadIoEventLoopGroup(EpollIoHandler.newFactory());
       }
     language: java
+---
+type: specs.openrewrite.org/v1beta/example
+recipeName: org.openrewrite.netty.UpgradeNetty_4_1_to_4_2
+examples:
+- description: ''
+  sources:
+  - before: |
+      import io.netty.buffer.ByteBuf;
+      import io.netty.incubator.channel.uring.IOUring;
+
+      class Test {
+          boolean isAvailable = IOUring.isAvailable();
+      }
+    after: |
+      import io.netty.buffer.ByteBuf;
+      import io.netty.channel.uring.IoUring;
+
+      class Test {
+          boolean isAvailable = IoUring.isAvailable();
+      }
+    language: java
