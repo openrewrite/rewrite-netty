@@ -26,7 +26,7 @@ tags:
 recipeList:
   - org.openrewrite.java.dependencies.UpgradeDependencyVersion:
       groupId: io.netty
-      artifactId: 4.1.x
+      artifactId: '*'
       newVersion: 4.2.x
   - org.openrewrite.java.dependencies.ChangeDependency:
       oldGroupId: io.netty.incubator
