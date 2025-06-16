@@ -65,8 +65,9 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
               </project>
               """,
             spec -> spec.after(pom -> assertThat(pom)
-              .describedAs("Expected 4.2.x in %s")
+              .describedAs("Expected library version 4.2.x")
               .containsPattern("4\\.2\\.\\d+\\.Final")
+              .doesNotContainPattern("4\\.1\\.\\d+\\.Final")
               .actual())),
           //language=java
           java(
