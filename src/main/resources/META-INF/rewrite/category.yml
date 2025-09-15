@@ -19,4 +19,7 @@ type: specs.openrewrite.org/v1beta/category
 name: Netty
 packageName: org.openrewrite.java.netty
 description: Recipes to perform [Netty](https://netty.io/) migration tasks.
+tags:
+  - java
+  - netty
 ---
