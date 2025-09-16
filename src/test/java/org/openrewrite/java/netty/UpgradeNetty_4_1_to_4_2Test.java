@@ -84,6 +84,12 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
                           <artifactId>netty-incubator-transport-classes-io_uring</artifactId>
                           <version>0.0.26.Final</version>
                       </dependency>
+                      <dependency>
+                          <groupId>io.netty.incubator</groupId>
+                          <artifactId>netty-incubator-transport-native-io_uring</artifactId>
+                          <version>0.0.26.Final</version>
+                          <classifier>linux-aarch_64</classifier>
+                      </dependency>
                   </dependencies>
               </project>
               """,
@@ -92,7 +98,10 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
               .containsPattern("4\\.2\\.\\d+\\.Final")
               .doesNotContainPattern("4\\.1\\.\\d+\\.Final")
               .doesNotContain("incubator")
+              .doesNotContain("0.0.26")
               .contains("netty-transport-classes-io_uring")
+              .contains("netty-transport-native-io_uring")
+              .contains("<classifier>linux-aarch_64</classifier>")
               .contains("netty-buffer")
               .actual()))
         );
