@@ -15,7 +15,7 @@
 type: specs.openrewrite.org/v1beta/example
 recipeName: org.openrewrite.java.netty.EventLoopGroupToMultiThreadIoEventLoopGroupRecipes
 examples:
-- description: ''
+- description: '`EventLoopGroupToMultiThreadIoEventLoopGroupTest#replaceEpoll`'
   sources:
   - before: |
       import io.netty.channel.EventLoopGroup;
@@ -37,7 +37,7 @@ examples:
 type: specs.openrewrite.org/v1beta/example
 recipeName: org.openrewrite.netty.UpgradeNetty_4_1_to_4_2
 examples:
-- description: ''
+- description: '`UpgradeNetty_4_1_to_4_2Test#changeType`'
   sources:
   - before: |
       import io.netty.buffer.ByteBuf;
