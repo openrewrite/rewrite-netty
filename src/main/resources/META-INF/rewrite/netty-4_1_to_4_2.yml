@@ -21,6 +21,8 @@ type: specs.openrewrite.org/v1beta/recipe
 name: org.openrewrite.netty.UpgradeNetty_4_1_to_4_2
 displayName: Migrates from Netty 4.1.x to Netty 4.2.x
 description: Migrate applications to the latest Netty 4.2.x release.
+preconditions:
+  - org.openrewrite.Singleton
 tags:
   - netty
 recipeList:
