@@ -9,6 +9,7 @@ recipeDependencies {
     parserClasspath("io.netty:netty-transport:4.2+")
     parserClasspath("io.netty:netty-transport-classes-epoll:4.2+")
     parserClasspath("io.netty:netty-common:4.2+")
+    parserClasspath("org.jboss.netty:netty:3.2.+")
 }
 
 val rewriteVersion = rewriteRecipe.rewriteVersion.get()
