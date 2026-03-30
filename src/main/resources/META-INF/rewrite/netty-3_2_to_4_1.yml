@@ -1,0 +1,113 @@
+#
+# Copyright 2025 original author or authors.
+# <p>
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+# <p>
+# https://www.apache.org/licenses/LICENSE-2.0
+# <p>
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+#
+
+########################################################################################################################
+# Netty library
+---
+type: specs.openrewrite.org/v1beta/recipe
+name: org.openrewrite.netty.UpgradeNetty_3_2_to_4_1
+displayName: Migrates from Netty 3.2.x to Netty 4.1.x
+description: Migrate applications to the latest Netty 4.1.x release.
+tags:
+  - netty
+recipeList:
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "*..* channelOpen(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)"
+      newMethodName: channelActive
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "*..* channelClosed(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.ChannelStateEvent)"
+      newMethodName: channelInactive
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "*..* messageReceived(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)"
+      newMethodName: channelRead
+  - org.openrewrite.java.spring.ChangeMethodParameter:
+      methodPattern: "*..* channelRead(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)"
+      parameterIndex: 1
+      parameterType: Object
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "org.jboss.netty.channel.ChannelHandlerContext getChannel()"
+      newMethodName: "channel"
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "org.jboss.netty.channel.ChannelHandlerContext getPipeline()"
+      newMethodName: "pipeline"
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "org.jboss.netty.channel.Channel getPipeline()"
+      newMethodName: "pipeline"
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "org.jboss.netty.channel.Channel isConnected()"
+      newMethodName: "isActive"
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "org.jboss.netty.channel.Channel getLocalAddress()"
+      newMethodName: "localAddress"
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "org.jboss.netty.channel.Channel getRemoteAddress()"
+      newMethodName: "remoteAddress"
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "org.jboss.netty.channel.Channel getCloseFuture())"
+      newMethodName: "closeFuture"
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "org.jboss.netty.channel.ChannelFuture getChannel()"
+      newMethodName: "channel"
+  - org.openrewrite.java.ChangeMethodName:
+      methodPattern: "org.jboss.netty.channel.ChannelFuture getCause()"
+      newMethodName: "cause"
+  - org.openrewrite.java.netty.upgrade._3_2_to_4_1_.ChannelSetReadableToAutoRead
+  - org.openrewrite.java.ReplaceAnnotation:
+      annotationPatternToReplace: "@org.jboss.netty.channel.ChannelPipelineCoverage(org.jboss.netty.channel.ChannelPipelineCoverage.ONE)"
+      annotationTemplateToInsert: "@io.netty.channel.ChannelHandler.Sharable"
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.jboss.netty.channel.SimpleChannelHandler
+      newFullyQualifiedTypeName: io.netty.channel.ChannelInboundHandlerAdapter
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.jboss.netty.channel.SimpleChannelUpstreamHandler
+      newFullyQualifiedTypeName: io.netty.channel.ChannelInboundHandlerAdapter
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.jboss.netty.handler.codec.frame.CorruptedFrameException
+      newFullyQualifiedTypeName: io.netty.handler.codec.CorruptedFrameException
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.jboss.netty.buffer.ChannelBuffer
+      newFullyQualifiedTypeName: io.netty.buffer.ByteBuf
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.jboss.netty.buffer.ChannelBuffers
+      newFullyQualifiedTypeName: io.netty.buffer.Unpooled
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.jboss.netty.channel.ExceptionEvent
+      newFullyQualifiedTypeName: java.lang.Throwable
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.jboss.netty.handler.codec.oneone.OneToOneDecoder
+      newFullyQualifiedTypeName: io.netty.handler.codec.MessageToMessageDecoder
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.jboss.netty.util.ObjectSizeEstimator
+      newFullyQualifiedTypeName: io.netty.channel.MessageSizeEstimator
+  - org.openrewrite.java.ChangeType:
+      oldFullyQualifiedTypeName: org.jboss.netty.util.DefaultObjectSizeEstimator
+      newFullyQualifiedTypeName: io.netty.channel.DefaultMessageSizeEstimator
+  - org.openrewrite.java.netty.upgrade._3_2_to_4_1_.StringEncoderToStandardCharsets
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: org.jboss.netty.logging
+      newPackageName: io.netty.util.internal.logging
+      recursive: true
+  - org.openrewrite.java.ChangePackage:
+      oldPackageName: org.jboss.netty
+      newPackageName: io.netty
+      recursive: true
+  - org.openrewrite.maven.ChangeDependencyGroupIdAndArtifactId:
+      oldGroupId: org.jboss.netty
+      oldArtifactId: netty
+      newGroupId: io.netty
+      newArtifactId: netty-all
+      newVersion: 4.1.x
+  - org.openrewrite.java.netty.upgrade._3_2_to_4_1_.ReplaceChannelsFireMessageReceived

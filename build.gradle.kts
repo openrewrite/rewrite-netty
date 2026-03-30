@@ -32,6 +32,7 @@ dependencies {
 
     testRuntimeOnly("org.jboss.netty:netty:3.2+")
     testRuntimeOnly("io.netty.incubator:netty-incubator-transport-classes-io_uring:0.0.26.Final")
+    testRuntimeOnly("org.openrewrite.recipe:rewrite-spring:6.25.1")
 }
 
 tasks.withType<JavaCompile> {
