@@ -21,7 +21,10 @@ import org.openrewrite.Recipe;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.JavaTemplate;
 import org.openrewrite.java.MethodMatcher;
+import org.openrewrite.java.tree.Expression;
 import org.openrewrite.java.tree.J;
+
+import java.util.List;
 
 public class ReplaceChannelsFireMessageReceived extends Recipe {
 
@@ -35,26 +38,38 @@ public class ReplaceChannelsFireMessageReceived extends Recipe {
 
     @Override
     public String getDescription() {
-        return "Replaces Netty 3 Channels.fireMessageReceived(ctx.channel(), key) with Netty 4 ctx.fireChannelRead(e).";
+        return "Replaces Netty 3 Channels.fireMessageReceived(channel, message) with Netty 4 ctx.fireChannelRead(message).";
     }
 
     @Override
     public JavaIsoVisitor<ExecutionContext> getVisitor() {
         return new JavaIsoVisitor<ExecutionContext>() {
 
-            final JavaTemplate replacement = JavaTemplate.builder("ctx.fireChannelRead(e)")
-                    .contextSensitive()
+            final JavaTemplate replacement = JavaTemplate.builder("#{any()}.fireChannelRead(#{any()})")
                     .build();
 
             @Override
             public J.MethodInvocation visitMethodInvocation(J.MethodInvocation mi, ExecutionContext ctx) {
                 J.MethodInvocation m = super.visitMethodInvocation(mi, ctx);
 
-                if (FIRE_MESSAGE_RECEIVED.matches(m)) {
-                    // Replace the entire method invocation expression statement.
-                    return replacement.apply(updateCursor(m), m.getCoordinates().replace());
+                if (!FIRE_MESSAGE_RECEIVED.matches(m)) {
+                    return m;
                 }
-                return m;
+
+                List<Expression> args = m.getArguments();
+                if (args.size() < 2) {
+                    return m;
+                }
+
+                Expression channel = args.get(0);
+                Expression message = args.get(1);
+
+                return replacement.apply(
+                        updateCursor(m),
+                        m.getCoordinates().replace(),
+                        channel,
+                        message
+                );
             }
         };
     }

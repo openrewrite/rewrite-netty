@@ -56,7 +56,7 @@ recipeList:
       methodPattern: "org.jboss.netty.channel.Channel getRemoteAddress()"
       newMethodName: "remoteAddress"
   - org.openrewrite.java.ChangeMethodName:
-      methodPattern: "org.jboss.netty.channel.Channel getCloseFuture())"
+      methodPattern: "org.jboss.netty.channel.Channel getCloseFuture()"
       newMethodName: "closeFuture"
   - org.openrewrite.java.ChangeMethodName:
       methodPattern: "org.jboss.netty.channel.ChannelFuture getChannel()"
