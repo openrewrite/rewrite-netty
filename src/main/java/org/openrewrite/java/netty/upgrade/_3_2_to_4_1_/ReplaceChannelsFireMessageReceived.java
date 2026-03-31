@@ -45,9 +45,6 @@ public class ReplaceChannelsFireMessageReceived extends Recipe {
     public JavaIsoVisitor<ExecutionContext> getVisitor() {
         return new JavaIsoVisitor<ExecutionContext>() {
 
-            final JavaTemplate replacement = JavaTemplate.builder("#{any()}.fireChannelRead(#{any()})")
-                    .build();
-
             @Override
             public J.MethodInvocation visitMethodInvocation(J.MethodInvocation mi, ExecutionContext ctx) {
                 J.MethodInvocation m = super.visitMethodInvocation(mi, ctx);
@@ -57,14 +54,12 @@ public class ReplaceChannelsFireMessageReceived extends Recipe {
                 }
 
                 List<Expression> args = m.getArguments();
-                if (args.size() < 2) {
-                    return m;
-                }
-
                 Expression channel = args.get(0);
                 Expression message = args.get(1);
 
-                return replacement.apply(
+                return JavaTemplate.builder("#{any()}.fireChannelRead(#{any()})")
+                        .build()
+                        .apply(
                         updateCursor(m),
                         m.getCoordinates().replace(),
                         channel,

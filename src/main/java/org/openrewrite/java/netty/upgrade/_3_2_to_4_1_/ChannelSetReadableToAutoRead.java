@@ -43,9 +43,6 @@ public class ChannelSetReadableToAutoRead extends Recipe {
     @Override
     public JavaIsoVisitor<ExecutionContext> getVisitor() {
         return new JavaIsoVisitor<ExecutionContext>() {
-            final JavaTemplate tpl = JavaTemplate.builder("#{any()}.config().setAutoRead(#{any(boolean)})")
-                    .build();
-
             @Override
             public J.MethodInvocation visitMethodInvocation(J.MethodInvocation mi, ExecutionContext ctx) {
                 J.MethodInvocation m = super.visitMethodInvocation(mi, ctx);
@@ -54,15 +51,12 @@ public class ChannelSetReadableToAutoRead extends Recipe {
                     return m;
                 }
 
-                // channel.setReadable(arg)
                 Expression select = m.getSelect();
-                if (select == null || m.getArguments().size() != 1) {
-                    return m;
-                }
-
                 Expression arg = m.getArguments().get(0);
 
-                return tpl.apply(
+                return JavaTemplate.builder("#{any()}.config().setAutoRead(#{any(boolean)})")
+                        .build()
+                        .apply(
                         updateCursor(m),
                         m.getCoordinates().replace(),
                         select,
