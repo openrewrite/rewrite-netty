@@ -21,10 +21,7 @@ import org.openrewrite.Recipe;
 import org.openrewrite.internal.ListUtils;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.tree.J;
-import org.openrewrite.java.tree.Statement;
 import org.openrewrite.java.tree.TypeUtils;
-
-import java.util.List;
 
 public class RemoveChannelStateEventParameter extends Recipe {
 
@@ -46,20 +43,14 @@ public class RemoveChannelStateEventParameter extends Recipe {
             public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration md, ExecutionContext ctx) {
                 J.MethodDeclaration m = super.visitMethodDeclaration(md, ctx);
 
-                List<Statement> newParams = ListUtils.map(m.getParameters(), param -> {
+                return m.withParameters(ListUtils.map(m.getParameters(), param -> {
                     if (param instanceof J.VariableDeclarations &&
                         TypeUtils.isOfClassType(((J.VariableDeclarations) param).getType(), "org.jboss.netty.channel.ChannelStateEvent")) {
                         maybeRemoveImport("org.jboss.netty.channel.ChannelStateEvent");
                         return null;
                     }
                     return param;
-                });
-
-                if (newParams == m.getParameters()) {
-                    return m;
-                }
-
-                return m.withParameters(newParams);
+                }));
             }
         };
     }
