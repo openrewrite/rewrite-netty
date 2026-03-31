@@ -15,7 +15,6 @@
  */
 package org.openrewrite.java.netty;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.openrewrite.DocumentExample;
 import org.openrewrite.InMemoryExecutionContext;
@@ -36,7 +35,6 @@ class UpgradeNetty_3_2_to_4_1Test implements RewriteTest {
             "netty"));
     }
 
-    @Disabled
     @DocumentExample
     @Test
     void changeMethodSignature() {
@@ -62,7 +60,6 @@ class UpgradeNetty_3_2_to_4_1Test implements RewriteTest {
         );
     }
 
-    @DocumentExample
     @Test
     void replaceChannelPipelineCoverageAnnotation() {
         rewriteRun(
