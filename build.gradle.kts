@@ -8,7 +8,9 @@ description = "Netty Migration"
 recipeDependencies {
     parserClasspath("io.netty:netty-transport:4.2+")
     parserClasspath("io.netty:netty-transport-classes-epoll:4.2+")
+    parserClasspath("io.netty:netty-codec-base:4.2+")
     parserClasspath("io.netty:netty-common:4.2+")
+    parserClasspath("org.jboss.netty:netty:3.2.+")
 }
 
 val rewriteVersion = rewriteRecipe.rewriteVersion.get()
@@ -29,7 +31,9 @@ dependencies {
     testImplementation("org.openrewrite:rewrite-maven")
     testImplementation("org.openrewrite:rewrite-test")
 
+    testRuntimeOnly("org.jboss.netty:netty:3.2+")
     testRuntimeOnly("io.netty.incubator:netty-incubator-transport-classes-io_uring:0.0.26.Final")
+    testRuntimeOnly("org.openrewrite.recipe:rewrite-spring:6.25.1")
 }
 
 tasks.withType<JavaCompile> {
