@@ -18,12 +18,12 @@ package org.openrewrite.java.netty.upgrade._3_2_to_4_1_;
 
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
+import org.openrewrite.internal.ListUtils;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.Statement;
 import org.openrewrite.java.tree.TypeUtils;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RemoveChannelStateEventParameter extends Recipe {
@@ -46,30 +46,19 @@ public class RemoveChannelStateEventParameter extends Recipe {
             public J.MethodDeclaration visitMethodDeclaration(J.MethodDeclaration md, ExecutionContext ctx) {
                 J.MethodDeclaration m = super.visitMethodDeclaration(md, ctx);
 
-                List<Statement> params = m.getParameters();
-                List<Statement> newParams = new ArrayList<>();
-                boolean changed = false;
-
-                for (Statement param : params) {
-                    if (param instanceof J.VariableDeclarations) {
-                        J.VariableDeclarations vd = (J.VariableDeclarations) param;
-                        if (TypeUtils.isOfClassType(vd.getType(), "org.jboss.netty.channel.ChannelStateEvent")) {
-                            changed = true;
-                            continue;
-                        }
+                List<Statement> newParams = ListUtils.map(m.getParameters(), param -> {
+                    if (param instanceof J.VariableDeclarations &&
+                        TypeUtils.isOfClassType(((J.VariableDeclarations) param).getType(), "org.jboss.netty.channel.ChannelStateEvent")) {
+                        maybeRemoveImport("org.jboss.netty.channel.ChannelStateEvent");
+                        return null;
                     }
-                    newParams.add(param);
-                }
+                    return param;
+                });
 
-                if (!changed) {
+                if (newParams == m.getParameters()) {
                     return m;
                 }
 
-                if (!newParams.isEmpty()) {
-                    newParams.set(0, newParams.get(0).withPrefix(newParams.get(0).getPrefix().withWhitespace("")));
-                }
-
-                maybeRemoveImport("org.jboss.netty.channel.ChannelStateEvent");
                 return m.withParameters(newParams);
             }
         };
