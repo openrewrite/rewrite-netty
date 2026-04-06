@@ -16,6 +16,7 @@
 
 package org.openrewrite.java.netty.upgrade._3_2_to_4_1_;
 
+import lombok.Getter;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
 import org.openrewrite.java.JavaIsoVisitor;
@@ -24,9 +25,10 @@ import org.openrewrite.java.JavaTemplate;
 import org.openrewrite.java.tree.J;
 import org.openrewrite.java.tree.JavaType;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import static java.util.Collections.unmodifiableMap;
 
 public class StringEncoderToStandardCharsets extends Recipe {
 
@@ -40,19 +42,15 @@ public class StringEncoderToStandardCharsets extends Recipe {
         map.put("UTF-16BE", "UTF_16BE");
         map.put("UTF-16LE", "UTF_16LE");
         map.put("UTF-16", "UTF_16");
-        CHARSET_MAPPING = Collections.unmodifiableMap(map);
+        CHARSET_MAPPING = unmodifiableMap(map);
     }
 
-    @Override
-    public String getDisplayName() {
-        return "Migrate StringEncoder(String) to StringEncoder(StandardCharsets)";
-    }
+    @Getter
+    final String displayName = "Migrate StringEncoder(String) to StringEncoder(StandardCharsets)";
 
-    @Override
-    public String getDescription() {
-        return "Replaces new StringEncoder(charsetName) with new StringEncoder(StandardCharsets.<constant>) " +
-                "for all standard charsets (US-ASCII, ISO-8859-1, UTF-8, UTF-16BE, UTF-16LE, UTF-16).";
-    }
+    @Getter
+    final String description = "Replaces new StringEncoder(charsetName) with new StringEncoder(StandardCharsets.<constant>) " +
+            "for all standard charsets (US-ASCII, ISO-8859-1, UTF-8, UTF-16BE, UTF-16LE, UTF-16).";
 
     @Override
     public JavaIsoVisitor<ExecutionContext> getVisitor() {

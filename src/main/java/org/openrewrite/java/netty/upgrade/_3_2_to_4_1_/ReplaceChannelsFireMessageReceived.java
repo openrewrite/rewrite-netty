@@ -16,6 +16,7 @@
 
 package org.openrewrite.java.netty.upgrade._3_2_to_4_1_;
 
+import lombok.Getter;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
 import org.openrewrite.java.JavaIsoVisitor;
@@ -31,15 +32,11 @@ public class ReplaceChannelsFireMessageReceived extends Recipe {
     private static final MethodMatcher FIRE_MESSAGE_RECEIVED =
             new MethodMatcher("org.jboss.netty.channel.Channels fireMessageReceived(..)", true);
 
-    @Override
-    public String getDisplayName() {
-        return "Replace Channels.fireMessageReceived(..) with ctx.fireChannelRead(e)";
-    }
+    @Getter
+    final String displayName = "Replace Channels.fireMessageReceived(..) with ctx.fireChannelRead(e)";
 
-    @Override
-    public String getDescription() {
-        return "Replaces Netty 3 Channels.fireMessageReceived(channel, message) with Netty 4 ctx.fireChannelRead(message).";
-    }
+    @Getter
+    final String description = "Replaces Netty 3 Channels.fireMessageReceived(channel, message) with Netty 4 ctx.fireChannelRead(message).";
 
     @Override
     public JavaIsoVisitor<ExecutionContext> getVisitor() {
@@ -57,14 +54,7 @@ public class ReplaceChannelsFireMessageReceived extends Recipe {
                 Expression channel = args.get(0);
                 Expression message = args.get(1);
 
-                return JavaTemplate.builder("#{any()}.fireChannelRead(#{any()})")
-                        .build()
-                        .apply(
-                        updateCursor(m),
-                        m.getCoordinates().replace(),
-                        channel,
-                        message
-                );
+                return JavaTemplate.apply("#{any()}.fireChannelRead(#{any()})", updateCursor(m), m.getCoordinates().replace(), channel, message);
             }
         };
     }

@@ -35,6 +35,43 @@ examples:
     language: java
 ---
 type: specs.openrewrite.org/v1beta/example
+recipeName: org.openrewrite.java.netty.upgrade._3_2_to_4_1_.StringEncoderToStandardCharsets
+examples:
+- description: '`StringEncoderToStandardCharsetsTest#changeStringEncoderConstructor`'
+  sources:
+  - before: |
+      import org.jboss.netty.handler.codec.string.StringEncoder;
+
+      class Test {
+          public void test() {
+              new StringEncoder("UTF-8");
+          }
+      }
+    after: |
+      import io.netty.handler.codec.string.StringEncoder;
+
+      import java.nio.charset.StandardCharsets;
+
+      class Test {
+          public void test() {
+              new StringEncoder(StandardCharsets.UTF_8);
+          }
+      }
+    language: java
+---
+type: specs.openrewrite.org/v1beta/example
+recipeName: org.openrewrite.netty.UpgradeNetty_3_2_to_4_1
+examples:
+- description: '`UpgradeNetty_3_2_to_4_1Test#changeMethodSignature`'
+  sources:
+  - before: "import org.jboss.netty.channel.ChannelHandlerContext;\nimport org.jboss.netty.channel.ChannelStateEvent;\n\
+      \nclass Test {\n    \tpublic void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent\
+      \ e) throws Exception {}\n}\n"
+    after: "import io.netty.channel.ChannelHandlerContext;\n\nclass Test {\n    \t\
+      public void channelActive(ChannelHandlerContext ctx) throws Exception {}\n}\n"
+    language: java
+---
+type: specs.openrewrite.org/v1beta/example
 recipeName: org.openrewrite.netty.UpgradeNetty_4_1_to_4_2
 examples:
 - description: '`UpgradeNetty_4_1_to_4_2Test#changeType`'

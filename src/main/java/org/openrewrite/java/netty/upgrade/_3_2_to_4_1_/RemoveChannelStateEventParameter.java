@@ -16,6 +16,7 @@
 
 package org.openrewrite.java.netty.upgrade._3_2_to_4_1_;
 
+import lombok.Getter;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
 import org.openrewrite.internal.ListUtils;
@@ -25,16 +26,12 @@ import org.openrewrite.java.tree.TypeUtils;
 
 public class RemoveChannelStateEventParameter extends Recipe {
 
-    @Override
-    public String getDisplayName() {
-        return "Remove ChannelStateEvent parameter from handler methods";
-    }
+    @Getter
+    final String displayName = "Remove ChannelStateEvent parameter from handler methods";
 
-    @Override
-    public String getDescription() {
-        return "Removes `ChannelStateEvent` parameters from Netty channel handler method declarations, " +
-               "as Netty 4 handler methods no longer take this parameter.";
-    }
+    @Getter
+    final String description = "Removes `ChannelStateEvent` parameters from Netty channel handler method declarations, " +
+            "as Netty 4 handler methods no longer take this parameter.";
 
     @Override
     public JavaIsoVisitor<ExecutionContext> getVisitor() {

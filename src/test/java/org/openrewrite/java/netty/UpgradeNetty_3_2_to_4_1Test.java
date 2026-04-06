@@ -31,7 +31,7 @@ class UpgradeNetty_3_2_to_4_1Test implements RewriteTest {
           .recipeFromResource(
             "/META-INF/rewrite/netty-3_2_to_4_1.yml",
             "org.openrewrite.netty.UpgradeNetty_3_2_to_4_1")
-          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(), 
+          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(),
             "netty"));
     }
 

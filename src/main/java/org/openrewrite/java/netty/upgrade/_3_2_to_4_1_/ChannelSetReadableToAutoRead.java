@@ -16,6 +16,7 @@
 
 package org.openrewrite.java.netty.upgrade._3_2_to_4_1_;
 
+import lombok.Getter;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Recipe;
 import org.openrewrite.java.JavaIsoVisitor;
@@ -30,15 +31,11 @@ public class ChannelSetReadableToAutoRead extends Recipe {
             // Netty 4 Channel type; adjust if you're matching Netty 3 types in sources
             new MethodMatcher("org.jboss.netty.channel.Channel setReadable(boolean)", true);
 
-    @Override
-    public String getDisplayName() {
-        return "Migrate Channel.setReadable(boolean) to Channel.config().setAutoRead(boolean)";
-    }
+    @Getter
+    final String displayName = "Migrate Channel.setReadable(boolean) to Channel.config().setAutoRead(boolean)";
 
-    @Override
-    public String getDescription() {
-        return "Replaces `channel.setReadable(x)` with `channel.config().setAutoRead(x)`.";
-    }
+    @Getter
+    final String description = "Replaces `channel.setReadable(x)` with `channel.config().setAutoRead(x)`.";
 
     @Override
     public JavaIsoVisitor<ExecutionContext> getVisitor() {
@@ -54,14 +51,7 @@ public class ChannelSetReadableToAutoRead extends Recipe {
                 Expression select = m.getSelect();
                 Expression arg = m.getArguments().get(0);
 
-                return JavaTemplate.builder("#{any()}.config().setAutoRead(#{any(boolean)})")
-                        .build()
-                        .apply(
-                        updateCursor(m),
-                        m.getCoordinates().replace(),
-                        select,
-                        arg
-                );
+                return JavaTemplate.apply("#{any()}.config().setAutoRead(#{any(boolean)})", updateCursor(m), m.getCoordinates().replace(), select, arg);
             }
         };
     }
