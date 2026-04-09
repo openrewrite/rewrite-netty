@@ -49,7 +49,7 @@ public class StringEncoderToStandardCharsets extends Recipe {
     final String displayName = "Migrate StringEncoder(String) to StringEncoder(StandardCharsets)";
 
     @Getter
-    final String description = "Replaces new StringEncoder(charsetName) with new StringEncoder(StandardCharsets.<constant>) " +
+    final String description = "Replaces `new StringEncoder(charsetName)` with `new StringEncoder(StandardCharsets.<constant>)` " +
             "for all standard charsets (US-ASCII, ISO-8859-1, UTF-8, UTF-16BE, UTF-16LE, UTF-16).";
 
     @Override
