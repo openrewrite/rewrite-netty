@@ -39,3 +39,11 @@ dependencies {
 tasks.withType<JavaCompile> {
     options.compilerArgs.add("-Arewrite.javaParserClasspathFrom=resources")
 }
+
+configurations.all {
+    resolutionStrategy.componentSelection.all {
+        if (candidate.group == "io.netty" && candidate.version.endsWith("-SNAPSHOT")) {
+            reject("Reject Netty SNAPSHOTs so dynamic 4.2.+ selectors only match released versions")
+        }
+    }
+}
