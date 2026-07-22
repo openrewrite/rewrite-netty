@@ -7,7 +7,7 @@ plugins {
 
 develocity {
     server = "https://community.develocity.cloud/"
-    projectId = "rewrite-netty"
+    projectId = "rewrite"
 
     val isCiServer = System.getenv("CI")?.equals("true") ?: false
     val accessKey = System.getenv("GRADLE_ENTERPRISE_ACCESS_KEY")
