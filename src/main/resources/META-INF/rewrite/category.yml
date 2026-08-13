@@ -23,3 +23,11 @@ tags:
   - java
   - netty
 ---
+type: specs.openrewrite.org/v1beta/category
+name: Netty 3.2 to 4.1
+packageName: org.openrewrite.java.netty.upgrade._3_2_to_4_1_
+description: Recipes to migrate from [Netty](https://netty.io/) 3.2.x to 4.1.x.
+tags:
+  - java
+  - netty
+---
