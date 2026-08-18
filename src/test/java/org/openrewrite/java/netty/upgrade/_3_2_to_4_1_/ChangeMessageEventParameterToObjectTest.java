@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.openrewrite.java.netty;
+package org.openrewrite.java.netty.upgrade._3_2_to_4_1_;
 
 import org.junit.jupiter.api.Test;
 import org.openrewrite.DocumentExample;
@@ -24,44 +24,17 @@ import org.openrewrite.test.RewriteTest;
 
 import static org.openrewrite.java.Assertions.java;
 
-class UpgradeNetty_3_2_to_4_1Test implements RewriteTest {
+class ChangeMessageEventParameterToObjectTest implements RewriteTest {
     @Override
     public void defaults(RecipeSpec spec) {
         spec
-          .recipeFromResource(
-            "/META-INF/rewrite/netty-3_2_to_4_1.yml",
-            "org.openrewrite.netty.UpgradeNetty_3_2_to_4_1")
-          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(),
-            "netty-3"));
+          .recipe(new ChangeMessageEventParameterToObject())
+          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(), "netty-3"));
     }
 
     @DocumentExample
     @Test
-    void changeMethodSignature() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import org.jboss.netty.channel.ChannelHandlerContext;
-              import org.jboss.netty.channel.ChannelStateEvent;
-
-              class Test {
-                  	public void channelOpen(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception {}
-              }
-              """,
-            """
-              import io.netty.channel.ChannelHandlerContext;
-
-              class Test {
-                  	public void channelActive(ChannelHandlerContext ctx) throws Exception {}
-              }
-              """
-          )
-        );
-    }
-
-    @Test
-    void changeMessageReceivedToChannelRead() {
+    void changeMessageEventToObject() {
         rewriteRun(
           //language=java
           java(
@@ -70,12 +43,12 @@ class UpgradeNetty_3_2_to_4_1Test implements RewriteTest {
               import org.jboss.netty.channel.MessageEvent;
 
               class Test {
-                  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+                  public void channelRead(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
                   }
               }
               """,
             """
-              import io.netty.channel.ChannelHandlerContext;
+              import org.jboss.netty.channel.ChannelHandlerContext;
 
               class Test {
                   public void channelRead(ChannelHandlerContext ctx, Object e) throws Exception {
@@ -87,20 +60,17 @@ class UpgradeNetty_3_2_to_4_1Test implements RewriteTest {
     }
 
     @Test
-    void replaceChannelPipelineCoverageAnnotation() {
+    void leaveOtherMethodsAlone() {
         rewriteRun(
           //language=java
           java(
             """
-              @org.jboss.netty.channel.ChannelPipelineCoverage(org.jboss.netty.channel.ChannelPipelineCoverage.ONE)
+              import org.jboss.netty.channel.ChannelHandlerContext;
+              import org.jboss.netty.channel.MessageEvent;
+
               class Test {
-              }
-              """,
-            """
-              import io.netty.channel.ChannelHandler;
-              
-              @ChannelHandler.Sharable
-              class Test {
+                  public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+                  }
               }
               """
           )

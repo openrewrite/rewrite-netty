@@ -33,10 +33,7 @@ recipeList:
   - org.openrewrite.java.ChangeMethodName:
       methodPattern: "*..* messageReceived(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)"
       newMethodName: channelRead
-  - org.openrewrite.java.spring.ChangeMethodParameter:
-      methodPattern: "*..* channelRead(org.jboss.netty.channel.ChannelHandlerContext, org.jboss.netty.channel.MessageEvent)"
-      parameterIndex: 1
-      parameterType: java.lang.Object
+  - org.openrewrite.java.netty.upgrade._3_2_to_4_1_.ChangeMessageEventParameterToObject
   - org.openrewrite.java.ChangeMethodName:
       methodPattern: "org.jboss.netty.channel.ChannelHandlerContext getChannel()"
       newMethodName: "channel"
