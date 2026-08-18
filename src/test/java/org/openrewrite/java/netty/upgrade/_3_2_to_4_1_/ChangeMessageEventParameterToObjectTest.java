@@ -29,7 +29,7 @@ class ChangeMessageEventParameterToObjectTest implements RewriteTest {
     public void defaults(RecipeSpec spec) {
         spec
           .recipe(new ChangeMessageEventParameterToObject())
-          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(), "netty"));
+          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(), "netty-3"));
     }
 
     @DocumentExample

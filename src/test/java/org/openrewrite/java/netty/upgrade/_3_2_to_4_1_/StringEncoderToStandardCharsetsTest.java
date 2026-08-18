@@ -30,7 +30,7 @@ class StringEncoderToStandardCharsetsTest implements RewriteTest {
         spec
           .recipe(new StringEncoderToStandardCharsets())
           .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(),
-            "netty"));
+            "netty-3"));
     }
 
     @DocumentExample

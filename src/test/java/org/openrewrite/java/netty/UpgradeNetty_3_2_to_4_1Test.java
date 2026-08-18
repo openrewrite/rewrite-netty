@@ -32,7 +32,7 @@ class UpgradeNetty_3_2_to_4_1Test implements RewriteTest {
             "/META-INF/rewrite/netty-3_2_to_4_1.yml",
             "org.openrewrite.netty.UpgradeNetty_3_2_to_4_1")
           .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(),
-            "netty"));
+            "netty-3"));
     }
 
     @DocumentExample
