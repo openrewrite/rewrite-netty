@@ -72,7 +72,7 @@ public class ChangeMessageEventParameterToObject extends Recipe {
                 if (methodType != null) {
                     methodType = methodType.withParameterTypes(ListUtils.map(methodType.getParameterTypes(),
                             parameterType -> TypeUtils.isOfClassType(parameterType, MESSAGE_EVENT) ? OBJECT : parameterType));
-                    m = m.withMethodType(methodType).withName(m.getName().withType(methodType));
+                    return m.withMethodType(methodType).withName(m.getName().withType(methodType));
                 }
                 return m;
             }
