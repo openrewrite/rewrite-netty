@@ -35,6 +35,28 @@ examples:
     language: java
 ---
 type: specs.openrewrite.org/v1beta/example
+recipeName: org.openrewrite.java.netty.upgrade._3_2_to_4_1_.ChangeMessageEventParameterToObject
+examples:
+- description: '`ChangeMessageEventParameterToObjectTest#changeMessageEventToObject`'
+  sources:
+  - before: |
+      import org.jboss.netty.channel.ChannelHandlerContext;
+      import org.jboss.netty.channel.MessageEvent;
+
+      class Test {
+          public void channelRead(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
+          }
+      }
+    after: |
+      import org.jboss.netty.channel.ChannelHandlerContext;
+
+      class Test {
+          public void channelRead(ChannelHandlerContext ctx, Object e) throws Exception {
+          }
+      }
+    language: java
+---
+type: specs.openrewrite.org/v1beta/example
 recipeName: org.openrewrite.java.netty.upgrade._3_2_to_4_1_.StringEncoderToStandardCharsets
 examples:
 - description: '`StringEncoderToStandardCharsetsTest#changeStringEncoderConstructor`'
