@@ -29,7 +29,7 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
     @Override
     public void defaults(RecipeSpec spec) {
         spec.recipe(new EventLoopGroupToMultiThreadIoEventLoopGroupRecipes())
-          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(), "netty-transport", "netty-transport-classes-epoll"));
+          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(), "netty-transport-4", "netty-transport-classes-epoll"));
     }
 
     @DocumentExample
