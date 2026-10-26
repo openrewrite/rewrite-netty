@@ -1,7 +1,7 @@
 ![Logo](https://github.com/openrewrite/rewrite/raw/main/doc/logo-oss.png)
 ### Migrate Netty projects. Automatically.
 
-[![ci](https://github.com/openrewrite/rewrite-netty/actions/workflows/ci.yml/badge.svg)](https://github.com/openrewrite/rewrite-netty/actions/workflows/ci.yml)
+[![ci](https://codegenomeproject.org/ci/modules/openrewrite/rewrite-netty/badge.svg)](https://codegenomeproject.org/ci/modules/openrewrite/rewrite-netty/builds/latest)
 [![Revved up by Develocity](https://img.shields.io/badge/Revved%20up%20by-Develocity-06A0CE?logo=Gradle&labelColor=02303A)](https://community.develocity.cloud/scans)
 
 ### What is this?
