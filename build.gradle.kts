@@ -11,6 +11,8 @@ recipeDependencies {
     parserClasspath("io.netty:netty-codec-base:4.2+")
     parserClasspath("io.netty:netty-common:4.2+")
     parserClasspath("org.jboss.netty:netty:3.2.+")
+
+    testParserClasspath("io.netty.incubator:netty-incubator-transport-classes-io_uring:0.0.26.Final")
 }
 
 val rewriteVersion = rewriteRecipe.rewriteVersion.get()
@@ -30,8 +32,6 @@ dependencies {
     testImplementation("org.openrewrite:rewrite-java-21")
     testImplementation("org.openrewrite:rewrite-maven")
     testImplementation("org.openrewrite:rewrite-test")
-
-    testRuntimeOnly("io.netty.incubator:netty-incubator-transport-classes-io_uring:0.0.26.Final")
 }
 
 tasks.withType<JavaCompile> {

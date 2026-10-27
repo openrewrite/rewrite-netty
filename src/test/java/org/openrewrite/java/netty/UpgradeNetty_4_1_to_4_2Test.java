@@ -17,6 +17,7 @@ package org.openrewrite.java.netty;
 
 import org.junit.jupiter.api.Test;
 import org.openrewrite.DocumentExample;
+import org.openrewrite.InMemoryExecutionContext;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.test.RecipeSpec;
 import org.openrewrite.test.RewriteTest;
@@ -32,8 +33,8 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
           .recipeFromResource(
             "/META-INF/rewrite/netty-4_1_to_4_2.yml",
             "org.openrewrite.netty.UpgradeNetty_4_1_to_4_2")
-          .parser(JavaParser.fromJavaVersion().classpath(
-            "netty-incubator-transport-classes-io_uring"));
+          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(),
+            "netty-incubator-transport-classes-io_uring-0.0.26"));
     }
 
     @DocumentExample
