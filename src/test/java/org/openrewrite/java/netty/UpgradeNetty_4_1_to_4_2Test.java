@@ -64,6 +64,40 @@ class UpgradeNetty_4_1_to_4_2Test implements RewriteTest {
     }
 
     @Test
+    void replaceEventLoopGroupAsPartOfUpgrade() {
+        rewriteRun(
+          spec -> spec.parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(),
+            "netty-common-4",
+            "netty-transport-4",
+            "netty-transport-classes-epoll")),
+          //language=java
+          java(
+            """
+              import io.netty.channel.EventLoopGroup;
+              import io.netty.channel.epoll.Epoll;
+              import io.netty.channel.epoll.EpollEventLoopGroup;
+              import io.netty.channel.nio.NioEventLoopGroup;
+
+              class Test {
+                  EventLoopGroup group = Epoll.isAvailable() ? new EpollEventLoopGroup(4) : new NioEventLoopGroup(4);
+              }
+              """,
+            """
+              import io.netty.channel.EventLoopGroup;
+              import io.netty.channel.MultiThreadIoEventLoopGroup;
+              import io.netty.channel.epoll.Epoll;
+              import io.netty.channel.epoll.EpollIoHandler;
+              import io.netty.channel.nio.NioIoHandler;
+
+              class Test {
+                  EventLoopGroup group = Epoll.isAvailable() ? new MultiThreadIoEventLoopGroup(4, EpollIoHandler.newFactory()) : new MultiThreadIoEventLoopGroup(4, NioIoHandler.newFactory());
+              }
+              """
+          )
+        );
+    }
+
+    @Test
     void changeDependency() {
         rewriteRun(
           pomXml(
