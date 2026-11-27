@@ -311,6 +311,36 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
     }
 
     @Test
+    void replaceBothBranchesOfTernary() {
+        rewriteRun(
+          //language=java
+          java(
+            """
+              import io.netty.channel.EventLoopGroup;
+              import io.netty.channel.epoll.Epoll;
+              import io.netty.channel.epoll.EpollEventLoopGroup;
+              import io.netty.channel.nio.NioEventLoopGroup;
+
+              class Test {
+                  EventLoopGroup group = Epoll.isAvailable() ? new EpollEventLoopGroup(2) : (new NioEventLoopGroup(2));
+              }
+              """,
+            """
+              import io.netty.channel.EventLoopGroup;
+              import io.netty.channel.MultiThreadIoEventLoopGroup;
+              import io.netty.channel.epoll.Epoll;
+              import io.netty.channel.epoll.EpollIoHandler;
+              import io.netty.channel.nio.NioIoHandler;
+
+              class Test {
+                  EventLoopGroup group = Epoll.isAvailable() ? new MultiThreadIoEventLoopGroup(2, EpollIoHandler.newFactory()) : (new MultiThreadIoEventLoopGroup(2, NioIoHandler.newFactory()));
+              }
+              """
+          )
+        );
+    }
+
+    @Test
     void replaceLocalVariableWithNonLiteralThreadCount() {
         rewriteRun(
           //language=java
@@ -526,6 +556,24 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
                   class Test {
                       EventLoopGroup group = new NioEventLoopGroup(1) {
                       };
+                  }
+                  """
+              )
+            );
+        }
+
+        @Test
+        void ternaryAssignedToSubclassType() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.nio.NioEventLoopGroup;
+
+                  class Test {
+                      NioEventLoopGroup group(boolean small) {
+                          return small ? new NioEventLoopGroup(1) : new NioEventLoopGroup();
+                      }
                   }
                   """
               )

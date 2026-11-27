@@ -135,9 +135,13 @@ public class EventLoopGroupToMultiThreadIoEventLoopGroupRecipes extends Recipe {
     }
 
     private static boolean targetAcceptsEventLoopGroup(Cursor cursor) {
-        Cursor parentCursor = cursor.getParentTreeCursor();
-        Object parent = parentCursor.getValue();
         J self = cursor.getValue();
+        Cursor parentCursor = cursor.getParentTreeCursor();
+        while (parentCursor.getValue() instanceof J.Parentheses || parentCursor.getValue() instanceof J.Ternary) {
+            self = parentCursor.getValue();
+            parentCursor = parentCursor.getParentTreeCursor();
+        }
+        Object parent = parentCursor.getValue();
         JavaType expected = null;
         if (parent instanceof J.VariableDeclarations.NamedVariable) {
             expected = ((J.VariableDeclarations.NamedVariable) parent).getType();
