@@ -31,7 +31,11 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
     @Override
     public void defaults(RecipeSpec spec) {
         spec.recipe(new EventLoopGroupToMultiThreadIoEventLoopGroupRecipes())
-          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(), "netty-common-4", "netty-transport-4", "netty-transport-classes-epoll", "netty-transport-classes-kqueue"));
+          .parser(JavaParser.fromJavaVersion().classpathFromResources(new InMemoryExecutionContext(),
+            "netty-common-4",
+            "netty-transport-4",
+            "netty-transport-classes-epoll",
+            "netty-transport-classes-kqueue"));
     }
 
     @DocumentExample
@@ -113,7 +117,6 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
         );
     }
 
-    @ParameterizedTest
     @CsvSource(delimiter = '|', value = {
       "io.netty.channel.epoll.EpollEventLoopGroup|io.netty.channel.epoll.EpollIoHandler|EpollEventLoopGroup|EpollIoHandler|4",
       "io.netty.channel.epoll.EpollEventLoopGroup|io.netty.channel.epoll.EpollIoHandler|EpollEventLoopGroup|EpollIoHandler|threadFactory",
@@ -132,6 +135,7 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
       "io.netty.channel.nio.NioEventLoopGroup|io.netty.channel.nio.NioIoHandler|NioEventLoopGroup|NioIoHandler|4, threadFactory",
       "io.netty.channel.nio.NioEventLoopGroup|io.netty.channel.nio.NioIoHandler|NioEventLoopGroup|NioIoHandler|4, executor",
     })
+    @ParameterizedTest
     void replaceWithArguments(String groupFqn, String handlerFqn, String group, String handler, String args) {
         String before = args == null ? "" : args;
         String after = before.isEmpty() ? "" : before + ", ";

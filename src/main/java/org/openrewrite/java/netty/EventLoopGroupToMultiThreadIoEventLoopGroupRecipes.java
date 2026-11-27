@@ -15,12 +15,13 @@
  */
 package org.openrewrite.java.netty;
 
+import lombok.Getter;
 import org.jspecify.annotations.Nullable;
+import org.openrewrite.Cursor;
 import org.openrewrite.ExecutionContext;
 import org.openrewrite.Preconditions;
 import org.openrewrite.Recipe;
 import org.openrewrite.TreeVisitor;
-import org.openrewrite.Cursor;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.JavaTemplate;
 import org.openrewrite.java.JavaVisitor;
@@ -79,22 +80,16 @@ public class EventLoopGroupToMultiThreadIoEventLoopGroupRecipes extends Recipe {
             MULTI_THREAD
     ));
 
-    @Override
-    public String getDisplayName() {
-        return "Replace all `EventLoopGroup`s with `MultiThreadIoEventLoopGroup`";
-    }
+    @Getter
+    final String displayName = "Replace all `EventLoopGroup`s with `MultiThreadIoEventLoopGroup`";
 
-    @Override
-    public String getDescription() {
-        return "Replaces Netty's `new *EventLoopGroup(..)` with `new MultiThreadIoEventLoopGroup(.., *IoHandler.newFactory())`. " +
-               "Only applied where an `EventLoopGroup` (or a supertype) is expected, as `MultiThreadIoEventLoopGroup` " +
-               "is not assignable to the transport-specific group types.";
-    }
+    @Getter
+    final String description = "Replaces Netty's `new *EventLoopGroup(..)` with `new MultiThreadIoEventLoopGroup(.., *IoHandler.newFactory())`. " +
+            "Only applied where an `EventLoopGroup` (or a supertype) is expected, as `MultiThreadIoEventLoopGroup` " +
+            "is not assignable to the transport-specific group types.";
 
-    @Override
-    public Set<String> getTags() {
-        return new HashSet<>(Arrays.asList("netty"));
-    }
+    @Getter
+    final Set<String> tags = new HashSet<>(Arrays.asList("netty"));
 
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
