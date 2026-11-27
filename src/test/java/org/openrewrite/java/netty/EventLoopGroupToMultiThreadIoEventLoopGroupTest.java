@@ -15,6 +15,8 @@
  */
 package org.openrewrite.java.netty;
 
+import org.jspecify.annotations.Nullable;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -118,25 +120,27 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
     }
 
     @CsvSource(delimiter = '|', value = {
-      "io.netty.channel.epoll.EpollEventLoopGroup|io.netty.channel.epoll.EpollIoHandler|EpollEventLoopGroup|EpollIoHandler|4",
-      "io.netty.channel.epoll.EpollEventLoopGroup|io.netty.channel.epoll.EpollIoHandler|EpollEventLoopGroup|EpollIoHandler|threadFactory",
-      "io.netty.channel.epoll.EpollEventLoopGroup|io.netty.channel.epoll.EpollIoHandler|EpollEventLoopGroup|EpollIoHandler|4, threadFactory",
-      "io.netty.channel.epoll.EpollEventLoopGroup|io.netty.channel.epoll.EpollIoHandler|EpollEventLoopGroup|EpollIoHandler|4, executor",
-      "io.netty.channel.kqueue.KQueueEventLoopGroup|io.netty.channel.kqueue.KQueueIoHandler|KQueueEventLoopGroup|KQueueIoHandler|",
-      "io.netty.channel.kqueue.KQueueEventLoopGroup|io.netty.channel.kqueue.KQueueIoHandler|KQueueEventLoopGroup|KQueueIoHandler|4",
-      "io.netty.channel.kqueue.KQueueEventLoopGroup|io.netty.channel.kqueue.KQueueIoHandler|KQueueEventLoopGroup|KQueueIoHandler|threadFactory",
-      "io.netty.channel.kqueue.KQueueEventLoopGroup|io.netty.channel.kqueue.KQueueIoHandler|KQueueEventLoopGroup|KQueueIoHandler|4, threadFactory",
-      "io.netty.channel.kqueue.KQueueEventLoopGroup|io.netty.channel.kqueue.KQueueIoHandler|KQueueEventLoopGroup|KQueueIoHandler|4, executor",
-      "io.netty.channel.local.LocalEventLoopGroup|io.netty.channel.local.LocalIoHandler|LocalEventLoopGroup|LocalIoHandler|4",
-      "io.netty.channel.local.LocalEventLoopGroup|io.netty.channel.local.LocalIoHandler|LocalEventLoopGroup|LocalIoHandler|threadFactory",
-      "io.netty.channel.local.LocalEventLoopGroup|io.netty.channel.local.LocalIoHandler|LocalEventLoopGroup|LocalIoHandler|4, threadFactory",
-      "io.netty.channel.nio.NioEventLoopGroup|io.netty.channel.nio.NioIoHandler|NioEventLoopGroup|NioIoHandler|4",
-      "io.netty.channel.nio.NioEventLoopGroup|io.netty.channel.nio.NioIoHandler|NioEventLoopGroup|NioIoHandler|threadFactory",
-      "io.netty.channel.nio.NioEventLoopGroup|io.netty.channel.nio.NioIoHandler|NioEventLoopGroup|NioIoHandler|4, threadFactory",
-      "io.netty.channel.nio.NioEventLoopGroup|io.netty.channel.nio.NioIoHandler|NioEventLoopGroup|NioIoHandler|4, executor",
+      "epoll|Epoll|4",
+      "epoll|Epoll|threadFactory",
+      "epoll|Epoll|4, threadFactory",
+      "epoll|Epoll|4, executor",
+      "kqueue|KQueue|",
+      "kqueue|KQueue|4",
+      "kqueue|KQueue|threadFactory",
+      "kqueue|KQueue|4, threadFactory",
+      "kqueue|KQueue|4, executor",
+      "local|Local|4",
+      "local|Local|threadFactory",
+      "local|Local|4, threadFactory",
+      "nio|Nio|4",
+      "nio|Nio|threadFactory",
+      "nio|Nio|4, threadFactory",
+      "nio|Nio|4, executor",
     })
     @ParameterizedTest
-    void replaceWithArguments(String groupFqn, String handlerFqn, String group, String handler, String args) {
+    void replaceWithArguments(String pkg, String transport, @Nullable String args) {
+        String group = transport + "EventLoopGroup";
+        String handler = transport + "IoHandler";
         String before = args == null ? "" : args;
         String after = before.isEmpty() ? "" : before + ", ";
         rewriteRun(
@@ -144,7 +148,7 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
           java(
             """
               import io.netty.channel.EventLoopGroup;
-              import %s;
+              import io.netty.channel.%s.%s;
               import java.util.concurrent.Executor;
               import java.util.concurrent.ThreadFactory;
 
@@ -153,11 +157,11 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
                       return new %s(%s);
                   }
               }
-              """.formatted(groupFqn, group, before),
+              """.formatted(pkg, group, group, before),
             """
               import io.netty.channel.EventLoopGroup;
               import io.netty.channel.MultiThreadIoEventLoopGroup;
-              import %s;
+              import io.netty.channel.%s.%s;
 
               import java.util.concurrent.Executor;
               import java.util.concurrent.ThreadFactory;
@@ -167,41 +171,7 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
                       return new MultiThreadIoEventLoopGroup(%s%s.newFactory());
                   }
               }
-              """.formatted(handlerFqn, after, handler)
-          )
-        );
-    }
-
-    @Test
-    void doNotChangeAlreadyMigrated() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.EventLoopGroup;
-              import io.netty.channel.MultiThreadIoEventLoopGroup;
-              import io.netty.channel.nio.NioIoHandler;
-
-              class Test {
-                  EventLoopGroup group = new MultiThreadIoEventLoopGroup(2, NioIoHandler.newFactory());
-              }
-              """
-          )
-        );
-    }
-
-    @Test
-    void doNotChangeWhenAssignedToSubclassType() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.nio.NioEventLoopGroup;
-
-              class Test {
-                  NioEventLoopGroup group = new NioEventLoopGroup(4);
-              }
-              """
+              """.formatted(pkg, handler, after, handler)
           )
         );
     }
@@ -370,159 +340,196 @@ class EventLoopGroupToMultiThreadIoEventLoopGroupTest implements RewriteTest {
         );
     }
 
-    @Test
-    void doNotChangeWhenReturnedAsSubclassType() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.nio.NioEventLoopGroup;
+    @Nested
+    class NoChange {
+        @Test
+        void alreadyMigrated() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.EventLoopGroup;
+                  import io.netty.channel.MultiThreadIoEventLoopGroup;
+                  import io.netty.channel.nio.NioIoHandler;
 
-              class Test {
-                  NioEventLoopGroup create() {
-                      return new NioEventLoopGroup(4);
+                  class Test {
+                      EventLoopGroup group = new MultiThreadIoEventLoopGroup(2, NioIoHandler.newFactory());
                   }
-              }
-              """
-          )
-        );
-    }
+                  """
+              )
+            );
+        }
 
-    @Test
-    void doNotChangeWhenAssignedToSubclassTypedVariable() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.nio.NioEventLoopGroup;
+        @Test
+        void assignedToSubclassType() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.nio.NioEventLoopGroup;
 
-              class Test {
-                  NioEventLoopGroup group;
-
-                  void init() {
-                      group = new NioEventLoopGroup(4);
+                  class Test {
+                      NioEventLoopGroup group = new NioEventLoopGroup(4);
                   }
-              }
-              """
-          )
-        );
-    }
+                  """
+              )
+            );
+        }
 
-    @Test
-    void doNotChangeWhenPassedAsSubclassTypedArgument() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.nio.NioEventLoopGroup;
+        @Test
+        void returnedAsSubclassType() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.nio.NioEventLoopGroup;
 
-              class Test {
-                  void take(NioEventLoopGroup group) {
+                  class Test {
+                      NioEventLoopGroup create() {
+                          return new NioEventLoopGroup(4);
+                      }
                   }
+                  """
+              )
+            );
+        }
 
-                  void run() {
-                      take(new NioEventLoopGroup(4));
+        @Test
+        void assignedToSubclassTypedVariable() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.nio.NioEventLoopGroup;
+
+                  class Test {
+                      NioEventLoopGroup group;
+
+                      void init() {
+                          group = new NioEventLoopGroup(4);
+                      }
                   }
-              }
-              """
-          )
-        );
-    }
+                  """
+              )
+            );
+        }
 
-    @Test
-    void doNotChangeWithVar() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.nio.NioEventLoopGroup;
+        @Test
+        void passedAsSubclassTypedArgument() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.nio.NioEventLoopGroup;
 
-              class Test {
-                  void run() {
-                      var group = new NioEventLoopGroup(4);
+                  class Test {
+                      void take(NioEventLoopGroup group) {
+                      }
+
+                      void run() {
+                          take(new NioEventLoopGroup(4));
+                      }
                   }
-              }
-              """
-          )
-        );
-    }
+                  """
+              )
+            );
+        }
 
-    @Test
-    void doNotChangeWhenReturnedFromLambda() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.EventLoopGroup;
-              import io.netty.channel.nio.NioEventLoopGroup;
+        @Test
+        void varDeclaration() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.nio.NioEventLoopGroup;
 
-              import java.util.function.Supplier;
-
-              class Test {
-                  Supplier<EventLoopGroup> supplier = () -> {
-                      return new NioEventLoopGroup();
-                  };
-              }
-              """
-          )
-        );
-    }
-
-    @Test
-    void doNotChangeWhenMethodIsInvokedOnNewInstance() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.nio.NioEventLoopGroup;
-
-              class Test {
-                  void run() {
-                      new NioEventLoopGroup(4).setIoRatio(50);
+                  class Test {
+                      void run() {
+                          var group = new NioEventLoopGroup(4);
+                      }
                   }
-              }
-              """
-          )
-        );
-    }
+                  """
+              )
+            );
+        }
 
-    @Test
-    void doNotChangeUnsupportedOverload() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.EventLoopGroup;
-              import io.netty.channel.nio.NioEventLoopGroup;
+        @Test
+        void returnedFromLambda() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.EventLoopGroup;
+                  import io.netty.channel.nio.NioEventLoopGroup;
 
-              import java.nio.channels.spi.SelectorProvider;
-              import java.util.concurrent.Executor;
+                  import java.util.function.Supplier;
 
-              class Test {
-                  EventLoopGroup create(Executor executor) {
-                      return new NioEventLoopGroup(1, executor, SelectorProvider.provider());
+                  class Test {
+                      Supplier<EventLoopGroup> supplier = () -> {
+                          return new NioEventLoopGroup();
+                      };
                   }
-              }
-              """
-          )
-        );
-    }
+                  """
+              )
+            );
+        }
 
-    @Test
-    void doNotChangeAnonymousSubclass() {
-        rewriteRun(
-          //language=java
-          java(
-            """
-              import io.netty.channel.EventLoopGroup;
-              import io.netty.channel.nio.NioEventLoopGroup;
+        @Test
+        void methodInvokedOnNewInstance() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.nio.NioEventLoopGroup;
 
-              class Test {
-                  EventLoopGroup group = new NioEventLoopGroup(1) {
-                  };
-              }
-              """
-          )
-        );
+                  class Test {
+                      void run() {
+                          new NioEventLoopGroup(4).setIoRatio(50);
+                      }
+                  }
+                  """
+              )
+            );
+        }
+
+        @Test
+        void unsupportedOverload() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.EventLoopGroup;
+                  import io.netty.channel.nio.NioEventLoopGroup;
+
+                  import java.nio.channels.spi.SelectorProvider;
+                  import java.util.concurrent.Executor;
+
+                  class Test {
+                      EventLoopGroup create(Executor executor) {
+                          return new NioEventLoopGroup(1, executor, SelectorProvider.provider());
+                      }
+                  }
+                  """
+              )
+            );
+        }
+
+        @Test
+        void anonymousSubclass() {
+            rewriteRun(
+              //language=java
+              java(
+                """
+                  import io.netty.channel.EventLoopGroup;
+                  import io.netty.channel.nio.NioEventLoopGroup;
+
+                  class Test {
+                      EventLoopGroup group = new NioEventLoopGroup(1) {
+                      };
+                  }
+                  """
+              )
+            );
+        }
     }
 }
