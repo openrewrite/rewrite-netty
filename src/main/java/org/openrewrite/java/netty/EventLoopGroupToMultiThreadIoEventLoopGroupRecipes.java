@@ -26,6 +26,7 @@ import org.openrewrite.internal.ListUtils;
 import org.openrewrite.java.JavaIsoVisitor;
 import org.openrewrite.java.JavaParser;
 import org.openrewrite.java.JavaTemplate;
+import org.openrewrite.java.MethodMatcher;
 import org.openrewrite.java.search.UsesMethod;
 import org.openrewrite.java.tree.Expression;
 import org.openrewrite.java.tree.J;
@@ -35,7 +36,6 @@ import org.openrewrite.java.tree.TypeUtils;
 import java.util.*;
 
 import static java.util.Collections.singleton;
-import static java.util.stream.Collectors.joining;
 
 public class EventLoopGroupToMultiThreadIoEventLoopGroupRecipes extends Recipe {
 
@@ -52,13 +52,14 @@ public class EventLoopGroupToMultiThreadIoEventLoopGroupRecipes extends Recipe {
         HANDLERS.put("io.netty.channel.nio.NioEventLoopGroup", "io.netty.channel.nio.NioIoHandler");
     }
 
-    private static final Set<String> SUPPORTED_SIGNATURES = new HashSet<>(Arrays.asList(
-            "",
-            "int",
-            THREAD_FACTORY,
-            "int," + THREAD_FACTORY,
-            "int," + EXECUTOR
-    ));
+    private static final String GROUP_CONSTRUCTOR = "io.netty.channel..*EventLoopGroup <constructor>";
+    private static final List<MethodMatcher> SUPPORTED_CONSTRUCTORS = Arrays.asList(
+            new MethodMatcher(GROUP_CONSTRUCTOR + "()"),
+            new MethodMatcher(GROUP_CONSTRUCTOR + "(int)"),
+            new MethodMatcher(GROUP_CONSTRUCTOR + "(" + THREAD_FACTORY + ")"),
+            new MethodMatcher(GROUP_CONSTRUCTOR + "(int, " + THREAD_FACTORY + ")"),
+            new MethodMatcher(GROUP_CONSTRUCTOR + "(int, " + EXECUTOR + ")")
+    );
 
     // `MultiThreadIoEventLoopGroup` and its supertypes; the transport-specific groups are subtypes of it, so
     // a group can only be replaced where one of these is expected.
@@ -89,7 +90,7 @@ public class EventLoopGroupToMultiThreadIoEventLoopGroupRecipes extends Recipe {
 
     @Override
     public TreeVisitor<?, ExecutionContext> getVisitor() {
-        return Preconditions.check(new UsesMethod<>("io.netty.channel..*EventLoopGroup <constructor>(..)"), new JavaIsoVisitor<ExecutionContext>() {
+        return Preconditions.check(new UsesMethod<>(GROUP_CONSTRUCTOR + "(..)"), new JavaIsoVisitor<ExecutionContext>() {
             @Override
             public J.NewClass visitNewClass(J.NewClass newClass, ExecutionContext ctx) {
                 J.NewClass nc = super.visitNewClass(newClass, ctx);
@@ -99,16 +100,15 @@ public class EventLoopGroupToMultiThreadIoEventLoopGroupRecipes extends Recipe {
                 }
                 String group = constructor.getDeclaringType().getFullyQualifiedName();
                 String handler = HANDLERS.get(group);
-                List<JavaType> paramTypes = constructor.getParameterTypes();
                 if (handler == null ||
-                    !SUPPORTED_SIGNATURES.contains(paramTypes.stream().map(EventLoopGroupToMultiThreadIoEventLoopGroupRecipes::typeName).collect(joining(","))) ||
+                    SUPPORTED_CONSTRUCTORS.stream().noneMatch(m -> m.matches(constructor)) ||
                     !targetAcceptsEventLoopGroup(getCursor())) {
                     return nc;
                 }
 
                 StringBuilder template = new StringBuilder("new ").append(MULTI_THREAD).append('(');
-                for (JavaType paramType : paramTypes) {
-                    template.append("#{any(").append(typeName(paramType)).append(")}, ");
+                for (JavaType paramType : constructor.getParameterTypes()) {
+                    template.append("#{any(").append(TypeUtils.toString(paramType)).append(")}, ");
                 }
                 template.append(handler).append(".newFactory())");
 
@@ -124,14 +124,6 @@ public class EventLoopGroupToMultiThreadIoEventLoopGroupRecipes extends Recipe {
                                 ListUtils.filter(nc.getArguments(), arg -> !(arg instanceof J.Empty)).toArray());
             }
         });
-    }
-
-    private static String typeName(JavaType type) {
-        if (type instanceof JavaType.Primitive) {
-            return ((JavaType.Primitive) type).getKeyword();
-        }
-        JavaType.FullyQualified fq = TypeUtils.asFullyQualified(type);
-        return fq == null ? String.valueOf(type) : fq.getFullyQualifiedName();
     }
 
     private static boolean targetAcceptsEventLoopGroup(Cursor cursor) {
